@@ -989,6 +989,7 @@ export const getSyncPlan = async (
   const deletions: DeletionOnRemote[] = [];
 
   const keptFolder = new Set<string>();
+  let broken: boolean = false;
   for (let i = 0; i < sortedKeys.length; ++i) {
     const key = sortedKeys[i];
     const val = mixedStates[key];
@@ -997,7 +998,14 @@ export const getSyncPlan = async (
       // decide some folders
       // because the keys are sorted by length
       // so all the children must have been shown up before in the iteration
-      await assignOperationToFolderInplace(val, keptFolder, vault, password);
+      try {
+        await assignOperationToFolderInplace(val, keptFolder, vault, password);
+      } catch (error) {
+        console.error(`${val.key}`)
+        broken = true;
+        continue;
+      }
+      
     } else {
       // get all operations of files
       // and at the same time get some helper info for folders
@@ -1039,6 +1047,9 @@ export const getSyncPlan = async (
       }
     }
   }
+  if (broken)
+    throw new Error("Errors occurred, Abort");
+    
 
   const currTs = Date.now();
   const currTsFmt = unixTimeToStr(currTs);
