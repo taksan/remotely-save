@@ -21,11 +21,6 @@ jobs:
     steps:
       - name: Checkout codes
         uses: actions/checkout@v2
-        with:
-          lfs: true
-          submodules: recursive
-      - name: Checkout LFS
-        run: git lfs checkout
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
